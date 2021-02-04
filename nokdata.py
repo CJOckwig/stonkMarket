@@ -38,7 +38,7 @@ def searchprice():
     if (nok_stonk > 5.5):
         print("\nsell stock")
     else:
-        print("\nHold you paper hand retard!!!")
+        print("\nHold you paper hand!!!")
 
 
 # calls the search price function

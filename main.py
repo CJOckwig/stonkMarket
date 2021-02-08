@@ -7,12 +7,17 @@ from bs4 import BeautifulSoup as bs
 
 
 def main():
-# gets todays date to put in csv
-# adds todays date to the first element of the list
-# reads first row of csv files
+    # gets todays date to put in csv
+    # adds todays date to the first element of the list
+    # reads first row of csv files
     date = datetime.date.today()
     todaysData = []
     todaysData.append(date)
+
+
+    tickList = []
+    #findTickers(tickList)
+
 
     file = open('stocks.csv', 'r', newline='')
     reader = csv.reader(file)
@@ -36,33 +41,34 @@ def main():
     ###############################################################
 
 
-    # count = 1
-    # while count < NumCol:
-    #     price_nyse_unformatted = searchPrice(CsvHeaders[count])
-    #     print(price_nyse_unformatted)
-    #     price_nyse = formatPrice(price_nyse_unformatted)
-    #     todaysData.append(price_nyse)
-    #     print("Added", CsvHeaders[count], "stock to list.")
-    #     count = count + 1
-    #     # adds count for while loop (gg ez)
+    count = 1
+    while count < NumCol:
+        price_nyse_unformatted = searchPrice(CsvHeaders[count])
+        print(price_nyse_unformatted)
+        price_nyse = formatPrice(price_nyse_unformatted)
+        todaysData.append(price_nyse)
+        print("Added", CsvHeaders[count], "stock to list.")
+        count = count + 1
+        # adds count for while loop (gg ez)
 
-    #writeToFile(todaysData)
-    tickList=[]
-    findTickers(tickList)
-
+    writeToFile(todaysData)
     # prints out data frame of stock data using pandas
     stockData = pd.read_csv("stocks.csv")
-    #print("\n\n", stockData)
+    print("\n\n", stockData)
 
 
 # Takes in ticker letter combo to search web URL
 def searchPrice(ticker):
     stockWeb = requests.get("https://www.google.com/search?q=" + ticker + "+stock")
-    pageContent = stockWeb.content
 
-    # uses bs4 to process and parse page code for certain tags
-    pageParser = bs(pageContent, 'html.parser')
-    stockPrice = pageParser.find('div', {'class': 'BNeawe iBp4i AP7Wnd'}).get_text()
+    if stockWeb.status_code == 200:
+        pageContent = stockWeb.content
+        # uses bs4 to process and parse page code for certain tags
+        pageParser = bs(pageContent, 'html.parser')
+        try:
+            stockPrice = pageParser.find('div', {'class': 'BNeawe iBp4i AP7Wnd'}).get_text()
+        except:
+            stockPrice =" "
     return stockPrice
 
 def formatPrice(base):
@@ -85,8 +91,15 @@ def writeToFile(todaysData):
     file.close()
 
 def findTickers(tickList):
-    url = requests.get('https://www.slickcharts.com/sp500')
+    data = pd.read_csv("tickers.csv")
+    tickList = data["Ticker"].to_list()
+    print(tickList)
+    file = open("stocks.csv", 'w')
+    write = csv.writer(file)
+    write.writerow(tickList)
+    file.close()
 
-    tickList = pd.read_html("https://www.slickcharts.com/sp500")
+
+
 
 main()
